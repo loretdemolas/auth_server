@@ -1,14 +1,12 @@
 import { Router } from "express";
 import User from "../model/user.js";
 import  bcrypt  from "bcryptjs";
-import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '../config/config.js';
-import verifyToken from "../middleware/auth.js";
-import pkg, { verify } from "jsonwebtoken";
+import { generateAccessToken, generateRefreshToken } from "../middleware/token.js";
+import verifyToken, {verifyRefreshToken} from "../middleware/auth.js";
 import {registerValidation, loginValidation } from "../middleware/validation.js"
 
 export const router = Router();
 
-const { sign } = pkg;
 
 router.post("/register", async (req, res ) => {
     
@@ -68,23 +66,13 @@ router.post("/login", async (req, res) => {
 
 });
 
-function generateAccessToken(user) {
-    return sign({_id: user._id}, TOKEN_KEY, { expiresIn: "15s" });
-}
 
-function generateRefreshToken(user) {
-    return sign({_id: user._id}, REFRESH_TOKEN_KEY);
-}
-router.post("/refresh", (req, res) => {
-    const refreshToken = req.body.token
-    if (refreshToken == null) return res.sendStatus(401);
-    if (!refreshToken.includes(refreshToken)) return res.sendStatus(403)
-    verify(refreshToken, REFRESH_TOKEN_KEY, (err, user) => {
-        if (err) return res.sendStatus(403);
-        const accessToken = generateAccessToken({_id: user._id});
-        res.json({accessToken: accessToken});
-    });
-});
+// change to pull the refresh token out of the database.
+router.post("/refresh", async (req, res) => {
+    const refreshToken = await User.findOne({token: req.body.token});
+    if(refreshToken== null) return res.status(400).send("refresh token doesn't exists");
+    verifyRefreshToken(refreshToken, res)
+});    
 
 router.get("/test", verifyToken, async (req, res) => {
     try {
@@ -104,16 +92,19 @@ router.delete("/logout", async (req, res) => {
     const user = await User.findOneAndUpdate(filter, update, {
         new: true
     });
-    res.status(204).send(user);
+    res.status(200).json({
+        success: "success",
+        message: "you have been logged out and your token wiped",
+    });
 })
 
 router.get("/logoutTest", async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email});
-        res.send(user);
+        res.send(user.token);
         console.log(user);
     } catch (err) {
-        console.log(err);
+        console.log(err.token);
     }
       
 });

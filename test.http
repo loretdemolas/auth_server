@@ -4,9 +4,10 @@ post http://localhost:5000/api/user/register
 Content-Type: application/json
 
 {
-    "name": "test",
-    "email": "teest@gmail.com",
-    "password":"123"
+    "first_name": "test jr.",
+    "last_name": "tester",
+    "email": "testjr@devygroup.net",
+    "password":"securepassword"
 }
 
 ### 
