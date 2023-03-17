@@ -1,6 +1,6 @@
-import { PORT } from './config/config.js';
+import { PORT } from './Auth-Server/config/config.js';
 import http from "http";
-import app from "./server.js";
+import app from "./Auth-Server/server.js";
 
 const server = http.createServer(app);
 

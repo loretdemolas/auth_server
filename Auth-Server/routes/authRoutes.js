@@ -22,7 +22,8 @@ router.post("/register", async (req, res ) => {
     const hashPassword =await bcrypt.hash(req.body.password, salt);
     
     const user = new User({
-        name: req.body.name,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
         email: req.body.email,
         password: hashPassword
     });
@@ -54,6 +55,15 @@ router.post("/login", async (req, res) => {
 
     user.token = refreshToken;
 
+    try {
+        const result = await user.save()
+            console.log(result);
+        
+    } catch (err) {
+        res.status(400).send(err);
+        console.log(err);
+    }
+
     res.json({accessToken:accessToken, refreshToken:refreshToken});
 
 });
@@ -78,7 +88,28 @@ router.post("/refresh", (req, res) => {
 
 router.get("/test", verifyToken, async (req, res) => {
     try {
-        const user = await User.findOne({ "email": req.body.email});
+        const user = await User.findOne({ email: req.body.email});
+        res.send(user);
+        console.log(user);
+    } catch (err) {
+        console.log(err);
+    }
+      
+});
+
+router.delete("/logout", async (req, res) => {
+    const update = {token: "logged out"};
+    const filter = {email: req.body.email}
+
+    const user = await User.findOneAndUpdate(filter, update, {
+        new: true
+    });
+    res.send(user);
+})
+
+router.get("/logoutTest", async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email});
         res.send(user);
         console.log(user);
     } catch (err) {

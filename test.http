@@ -51,5 +51,23 @@ Content-Type: application/json
     "email": "{{signup.request.body.email}}"
 }
 
+###
+# @name logout
+@storedAuthToken = {{refreshTokenTest.response.body.token}}
+delete http://localhost:5000/api/user/logout
+Authorization: Bearer {{storedAuthToken}}
+Content-Type: application/json
 
+{
+    "email": "{{signup.request.body.email}}"
+}
+
+###
+# @name logoutTest
+get http://localhost:5000/api/user/logoutTest
+Content-Type: application/json
+
+{
+    "email": "{{signup.request.body.email}}"
+}
 

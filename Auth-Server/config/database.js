@@ -4,9 +4,9 @@ import { MONGO_URI } from './config.js';
 export function dbConnect() {
   // Connecting to the database
   connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
     .then(() => {
       console.log("Successfully connected to database");
     })

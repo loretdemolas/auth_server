@@ -10,7 +10,7 @@ dbConnect()
 const app = express();
 
 const corsOptions = {
-    origin: "*",
+    origin: CLIENT,
     optionSuccessStatus: 200
 }
 
