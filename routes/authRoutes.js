@@ -3,7 +3,7 @@ import User from "../model/user.js";
 import  bcrypt  from "bcryptjs";
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '../config/config.js';
 import verifyToken from "../middleware/auth.js";
-import pkg from "jsonwebtoken";
+import pkg, { verify } from "jsonwebtoken";
 import {registerValidation, loginValidation } from "../middleware/validation.js"
 
 export const router = Router();
@@ -27,10 +27,13 @@ router.post("/register", async (req, res ) => {
         password: hashPassword
     });
     try {
-        const savedUser = await user.save();
-        res.send({user: user._id});
+        const result = await user.save()
+            res.send({user: user._id})
+            console.log(result);
+        
     } catch (err) {
         res.status(400).send(err);
+        console.log(err);
     }
 });
 router.post("/login", async (req, res) => {
@@ -40,28 +43,51 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(400).send("Email doesn't exists");
+    console.log(user)
 
     const validPassword = await bcrypt.compare(req.body.password, user.password);
     if (!validPassword) return res.status(400).send("Invalid password");
 
-    const token = sign(
-        {_id: user._id}, 
-        TOKEN_KEY,
-        {
-            expiresIn: "5m"
-        }
-    );
-    res.header("auth-token", token).send(token);
+    const accessToken = generateAccessToken(user);
+
+    const refreshToken = generateRefreshToken(user);
+
+    user.token = refreshToken;
+
+    res.json({accessToken:accessToken, refreshToken:refreshToken});
 
 });
-router.post("/refresh", () => {});
 
-router.get("/test", verifyToken, (req, res) => {
-    res.status(200).send("access granted!");
-  });
+function generateAccessToken(user) {
+    return sign({_id: user._id}, TOKEN_KEY, { expiresIn: "15s" });
+}
 
+function generateRefreshToken(user) {
+    return sign({_id: user._id}, REFRESH_TOKEN_KEY);
+}
+router.post("/refresh", (req, res) => {
+    const refreshToken = req.body.token
+    if (refreshToken == null) return res.sendStatus(401);
+    if (!refreshToken.includes(refreshToken)) return res.sendStatus(403)
+    verify(refreshToken, REFRESH_TOKEN_KEY, (err, user) => {
+        if (err) return res.sendStatus(403);
+        const accessToken = generateAccessToken({_id: user._id});
+        res.json({accessToken: accessToken});
+    });
+});
 
-router.use("*", (req, res) => {
+router.get("/test", verifyToken, async (req, res) => {
+    try {
+        const user = await User.findOne({ "email": req.body.email});
+        res.send(user);
+        console.log(user);
+    } catch (err) {
+        console.log(err);
+    }
+      
+});
+
+  router.use("*", (req, res) => {
     res.status(404).json({
         success: "false",
         message: "Page not found",

@@ -2,18 +2,23 @@ import { verify } from "jsonwebtoken";
 import { TOKEN_KEY } from '../config/config.js'
 
 function verifyToken (req, res, next) {
-  const token = req.headers.token;
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) {
+  if (token == null) {
     return res.status(403).send("access denied");
   }
-  try {
-    const verified = verify(token, TOKEN_KEY);
-    req.user = verified;
-  } catch (err) {
-      return res.status(401).send("Invalid Token");
-  }
-  return next();
+
+  verify(token, TOKEN_KEY, (err, user) => 
+  {
+    if (err) {
+      return res.sendStatus(401);
+    }
+
+    req.user = user;
+    next();
+  })
+  
 };
 
 export {verifyToken as default}
