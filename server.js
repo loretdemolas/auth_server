@@ -1,32 +1,21 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const passport = require("passport");
-const cookieSession = require("cookie-session");
-const passportSetup = require("./passport");
-const authRoute = require("./routes/auth");
+import express, { json } from "express";
+import { CLIENT} from './config/config.js';
+import cors from 'cors'
+import { dbConnect } from "./config/database.js";
+import { router } from "./routes/authRoutes.js";
+
+dbConnect()
+
 
 const app = express();
 
-app.use(
-    cookieSession({
-        name:"session",
-        keys:["trainingstats"],
-    })
-);
+const corsOptions = {
+    origin: "*",
+    optionSuccessStatus: 200
+}
 
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(json({ limit: "50mb" }));
+app.use(cors(corsOptions))
+app.use('/api/user', router)
 
-app.use(
-    cors({
-        origin: "https://localhost:3000",
-        methods: "GET,POST,PUT,DELETE",
-        credentials: true,
-    })
-);
-
-app.use("/auth",authRoute);
-
-const port = process.env.PORT||8080;
-app.listen(port,()=>console.log('listening on port ${port}...'));
+export default app;
