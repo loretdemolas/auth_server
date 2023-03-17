@@ -104,7 +104,7 @@ router.delete("/logout", async (req, res) => {
     const user = await User.findOneAndUpdate(filter, update, {
         new: true
     });
-    res.send(user);
+    res.status(204).send(user);
 })
 
 router.get("/logoutTest", async (req, res) => {
