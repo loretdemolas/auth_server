@@ -1,4 +1,4 @@
-###
+### Create account
 # @name signup
 post http://localhost:5000/api/user/register
 Content-Type: application/json
@@ -10,7 +10,7 @@ Content-Type: application/json
     "password":"securepassword"
 }
 
-### 
+### Login and receive tokens
 # @name login
 post http://localhost:5000/api/user/login
 Content-Type: application/json
@@ -20,7 +20,7 @@ Content-Type: application/json
     "password":"{{signup.request.body.password}}"
 }
 
-###
+### Test auth
 # @name loginTokenTest
 @authToken = {{login.response.body.accessToken}}
 get http://localhost:5000/api/user/test
@@ -31,8 +31,16 @@ Content-Type: application/json
     "email": "{{signup.request.body.email}}"
 }
 
+### Use to fetch tokens stored in the DB
+# @name DbToken
+get http://localhost:5000/api/user/DbTokenTest
+Content-Type: application/json
+
+{
+    "email": "{{signup.request.body.email}}"
+}
 ###
-@refreshToken = {{login.response.body.refreshToken}}
+@refreshToken = {{DbToken.response.body.token}}
 # @name refresh
 POST http://localhost:5000/api/user/refresh 
 Content-Type: application/json
@@ -62,13 +70,3 @@ Content-Type: application/json
 {
     "email": "{{signup.request.body.email}}"
 }
-
-###
-# @name logoutTest
-get http://localhost:5000/api/user/logoutTest
-Content-Type: application/json
-
-{
-    "email": "{{signup.request.body.email}}"
-}
-

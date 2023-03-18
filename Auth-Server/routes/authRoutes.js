@@ -2,8 +2,10 @@ import { Router } from "express";
 import User from "../model/user.js";
 import  bcrypt  from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../middleware/token.js";
-import verifyToken, {verifyRefreshToken} from "../middleware/auth.js";
+import verifyToken from "../middleware/auth.js";
 import {registerValidation, loginValidation } from "../middleware/validation.js"
+import { REFRESH_TOKEN_KEY } from "../config/config.js";
+import { verify } from "jsonwebtoken";
 
 export const router = Router();
 
@@ -69,10 +71,17 @@ router.post("/login", async (req, res) => {
 
 // change to pull the refresh token out of the database.
 router.post("/refresh", async (req, res) => {
-    const refreshToken = await User.findOne({token: req.body.token});
-    if(refreshToken== null) return res.status(400).send("refresh token doesn't exists");
-    verifyRefreshToken(refreshToken, res)
-});    
+    const user = await User.findOne({token: req.body.token});
+    if(user.token == null) return res.status(400).send("refresh token doesn't exists");
+    const refreshToken = user.token
+    verify(refreshToken, REFRESH_TOKEN_KEY, (err, user) => {
+        if (err) return res.sendStatus(403);
+        console.log(err);
+        const accessToken = generateAccessToken({_id: user._id});
+        res.json({accessToken: accessToken});
+      });
+    })
+   
 
 router.get("/test", verifyToken, async (req, res) => {
     try {
@@ -89,7 +98,7 @@ router.delete("/logout", async (req, res) => {
     const update = {token: "logged out"};
     const filter = {email: req.body.email}
 
-    const user = await User.findOneAndUpdate(filter, update, {
+    await User.findOneAndUpdate(filter, update, {
         new: true
     });
     res.status(200).json({
@@ -98,11 +107,12 @@ router.delete("/logout", async (req, res) => {
     });
 })
 
-router.get("/logoutTest", async (req, res) => {
+router.get("/DbTokenTest", async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email});
-        res.send(user.token);
-        console.log(user);
+        const token = user.token;
+        res.json({token:token});
+        console.log({token:token});
     } catch (err) {
         console.log(err.token);
     }
