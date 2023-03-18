@@ -1,5 +1,4 @@
 # auth_server
-### **Do not forget to remove all development routes before "production"**
 
 ## post /api/user/register
 ### production
@@ -20,7 +19,7 @@
 ### production
 - finds the user by token in body
 - checks to see if the token exists in the db
-- verifies the token and issues a new accesstoken  
+- verifies the token and issues a new access token  
 
 ## get /api/user/test
 ### development
@@ -30,15 +29,12 @@
 - returns user details
 
 ## delete /api/user/logout
-### development
+### production
 - finds user in db using email
 - updates token to "logged out" thus invalidating the refresh token
 - sends a status and message
 
-## get /api/user/DbTokenTest
-- finds the user in db using email
-- grabs and sends the token back to the user
-
 ## use *
+### production
 - catch all that displays a 404 missing page
 - used to notify user of broken route
