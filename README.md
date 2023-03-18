@@ -1,5 +1,4 @@
 # auth_server
-### **Do not forget to remove all development routes before "production"**
 
 ## post /api/user/register
 ### production
@@ -20,7 +19,7 @@
 ### production
 - finds the user by token in body
 - checks to see if the token exists in the db
-- verifies the token and issues a new accesstoken  
+- verifies the token and issues a new access token  
 
 ## get /api/user/test
 ### production

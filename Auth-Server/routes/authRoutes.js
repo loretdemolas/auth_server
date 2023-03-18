@@ -28,9 +28,9 @@ router.post("/register", async (req, res ) => {
         password: hashPassword
     });
     try {
-        const result = await user.save()
-            res.send({user: user._id})
-            console.log(result);
+        await user.save()
+        res.send({user: user._id})
+        
         
     } catch (err) {
         res.status(400).send(err);
@@ -44,7 +44,7 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(400).send("Email doesn't exists");
-    console.log(user)
+    
 
     const validPassword = await bcrypt.compare(req.body.password, user.password);
     if (!validPassword) return res.status(400).send("Invalid password");
@@ -56,8 +56,8 @@ router.post("/login", async (req, res) => {
     user.token = refreshToken;
 
     try {
-        const result = await user.save()
-            console.log(result);
+        await user.save()
+        
         
     } catch (err) {
         res.status(400).send(err);
@@ -69,7 +69,6 @@ router.post("/login", async (req, res) => {
 });
 
 
-// change to pull the refresh token out of the database.
 router.post("/refresh", async (req, res) => {
     const user = await User.findOne({token: req.body.token});
     if(user.token == null) return res.status(400).send("refresh token doesn't exists");
@@ -87,7 +86,6 @@ router.get("/test", verifyToken, async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email});
         res.send(user);
-        console.log(user);
     } catch (err) {
         console.log(err);
     }
@@ -106,18 +104,6 @@ router.delete("/logout", async (req, res) => {
         message: "you have been logged out and your token wiped",
     });
 })
-
-router.get("/DbTokenTest", async (req, res) => {
-    try {
-        const user = await User.findOne({ email: req.body.email});
-        const token = user.token;
-        res.json({token:token});
-        console.log({token:token});
-    } catch (err) {
-        console.log(err.token);
-    }
-      
-});
 
   router.use("*", (req, res) => {
     res.status(404).json({
