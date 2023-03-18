@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  Authmongodb:
+    image: mongo:6.0
+    restart: unless-stopped
+    environment:
+      - GOSU_VERSION=1.16
+      - HOME=/data/db
+      - JSYAML_VERSION=3.13.1
+      - MONGO_MAJOR=6.0
+      - MONGO_PACKAGE=mongodb-org
+      - MONGO_REPO=repo.mongodb.org
+      - MONGO_VERSION=6.0.5
+    ports:
+      - target: 27017
+    volumes:
+      - type: volumes
+        source: AuthDB
+        target: /data/db
+      - type: volumes
+        source: AuthDbConfig
+        target: /data/configdb
+    networks:
+      - network1
+  app:
+    depends_on:
+      - Authmongodb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - target: 5000
+        published: 5000
+        protocol: tcp
+    environment:
+      - DB_HOST=Authmongodb
+      - TOKEN_KEY=$TOKEN_KEY
+      - REFRESH_TOKEN_KEY=$REFRESH_TOKEN_KEY
+      - DB_PORT=27017
+    stdin_open: true
+    tty: true
+    networks:
+      - network1
+volumes:
+  AuthDB:
+    external: true
+  AuthDbConfig:
+    external: true
+networks:
+  network1:
+    name: AuthServer
+    external: true

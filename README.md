@@ -22,7 +22,7 @@
 - verifies the token and issues a new access token  
 
 ## get /api/user/test
-### development
+### production
 - checks to see if the route can be accessed with/without access token
 - can not be accessed with refresh token
 - finds the use in db using email send by json body
@@ -33,6 +33,11 @@
 - finds user in db using email
 - updates token to "logged out" thus invalidating the refresh token
 - sends a status and message
+
+## get /api/user/DbTokenTest
+### development
+- finds the user in db using email
+- grabs and sends the token back to the user
 
 ## use *
 ### production
