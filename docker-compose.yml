@@ -15,10 +15,10 @@ services:
     ports:
       - target: 27017
     volumes:
-      - type: volumes
+      - type: volume
         source: AuthDB
         target: /data/db
-      - type: volumes
+      - type: volume
         source: AuthDbConfig
         target: /data/configdb
     networks:
@@ -37,10 +37,11 @@ services:
         protocol: tcp
     environment:
       - "DB_HOST=Authmongodb"
-      - "TOKEN_KEY=$TOKEN_KEY"
-      - "REFRESH_TOKEN_KEY=$REFRESH_TOKEN_KEY"
-      - "DB_PORT=27017"
-    stdin_open: true
+      - "PORT=5000"
+      - "CLIENT=*"
+      - "MONGO_URI=mongodb://Authmongodb:27017"
+      - "TOKEN_KEY=TOKEN_KEY"
+      - "REFRESH_TOKEN_KEY=REFRESH_TOKEN_KEY"
     tty: true
     networks:
       - network1
