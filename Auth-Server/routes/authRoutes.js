@@ -70,8 +70,8 @@ router.post("/login", async (req, res) => {
 
 
 router.post("/refresh", async (req, res) => {
-    const user = await User.findOne({token: req.body.token});
-    if(user.token == null) return res.status(400).send("refresh token doesn't exists");
+    const user = await User.findOne({token: req.body.email});
+    if(user.token == "logged out") return res.status(400).send("refresh token doesn't exists");
     const refreshToken = user.token
     verify(refreshToken, REFRESH_TOKEN_KEY, (err, user) => {
         if (err) return res.sendStatus(403);
