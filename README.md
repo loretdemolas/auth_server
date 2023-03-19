@@ -11,7 +11,7 @@
 {
     "first_name": "Sebastian",
     "last_name": "Loret de Mola",
-    "email": "sebas@gmail.com",
+    "email": "email@gmail.com",
     "password":"password"
 }
 ```
